@@ -1,9 +1,7 @@
 module c3_lsp;
 
 import std::io;
-import std::core::mem;
-import std::io::file;
-import std::time::datetime;
+import std::os;
 
 /*
 	Return-codes:
@@ -13,46 +11,14 @@ import std::time::datetime;
 	- 3x: failure while closing up
 */
 
-File log_file;
-
-macro void? initialize_log_file(String prog_path) {
-	log_file = file::open("c3_lsp.log", "w")!;
-	log_file.write("C3-lsp is starting up.\n")!;
-	log_file.write("It currently is ")!;
-	log_file.write(datetime::tformat(DateTimeFormat.DATETIME, datetime::now().to_local()))!;
-	log_file.write("\nWe're alive from: ")!;
-	log_file.write(prog_path)!;
-	log_file.write("\n")!;
-}
-
-macro void? close_log_file() {
-	_log("Shutting down LSP.")!;
-	log_file.close()!;
-}
-
-macro void? _log(String message) {
-	log_file.write("[C3-lsp, ")!;
-	log_file.write(datetime::tformat(DateTimeFormat.DATETIME, datetime::now().to_local()))!;
-	log_file.write("] ")!;
-	log_file.write(message)!;
-	log_file.write("\n")!;
-}
-
-macro log(String message) {
-	if (catch error = _log(message)) {
-		io::fprintfn(
-			io::stderr(),
-			"Failed to log the following message: %s\nReason: %s\n",
-			message,
-			error
-		);
-	}
+macro error_exit(int code, String message_format, args...) {
+	io::fprintf(io::stderr(), message_format, args)!!;
+	os::exit(code);
 }
 
 fn int main(String[] args) {
-	if (catch error = initialize_log_file(args[0])) {
-		io::fprintf(io::stderr(), "Failed to initialize log-file 'c3_lsp.log': %s\n", error)!!;
-		return 10;
+	if (catch error = initialize_log_file(args)) {
+		error_exit(10, "Failed to initialize log-file 'c3_lsp.log': %s\n", error);
 	}
 
 	while (true) {
@@ -61,16 +27,14 @@ fn int main(String[] args) {
 			if (error == io::EOF) {
 				break;
 			}
-			io::fprintf(io::stderr(), "Failed to read from stdin: %s", error)!!;
-			return 20;
+			error_exit(20, "Failed to read from stdin: %s\n", error);
 		}
-
+		// TODO: handle this input
 		log(input);
 	}
 
 	if (catch error = close_log_file()) {
-		io::fprintf(io::stderr(), "Failed to close log-file 'c3_lsp.log': %s\n", error)!!;
-		return 30;
+		error_exit(30, "Failed to close log-file 'c3_lsp.log': %s\n", error);
 	}
 	return 0;
 }
