@@ -35,7 +35,8 @@ macro void? _log(String message) {
 }
 
 macro void log(String message) {
-	if (catch error = _log(message)) {
+	String to_log = message.treplace("\r", "\\r").treplace("\n", "\\n");
+	if (catch error = _log(to_log)) {
 		io::fprintfn(
 			io::stderr(),
 			"Failed to log the following message: %s\nReason: %s\n",
