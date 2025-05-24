@@ -2,6 +2,7 @@ module c3_lsp;
 
 import std::io;
 import std::os;
+import custom;
 
 /*
 	Return-codes:
@@ -22,7 +23,7 @@ fn int main(String[] args) {
 	}
 
 	while (true) {
-		String? input = io::treadline();
+		String? input = custom::treadline();
 		if (catch error = input) {
 			if (error == io::EOF) {
 				break;

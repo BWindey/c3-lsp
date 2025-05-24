@@ -3,7 +3,10 @@
 // a copy of which can be found in the LICENSE_STDLIB file.
 // Slightly modified by BWindey, and availablue under same MIT license
 // as actual C3 standard library
-module custom::std::io;
+module custom;
+
+// We still import actual io to get stdin and the errors.
+import std::io;
 
 <*
  Read from a stream (default is stdin) to the next "\n"
@@ -11,7 +14,7 @@ module custom::std::io;
  "\n" and "\r" are included in the String.
 
  @param stream : `The stream to read from.`
- @require @is_instream(stream) : `The stream must implement InStream.`
+ @require io::@is_instream(stream) : `The stream must implement InStream.`
  @param [inout] allocator : `the allocator to use.`
  @return `The string containing the data read.`
 *>
@@ -54,7 +57,7 @@ macro String? readline(Allocator allocator, stream = io::stdin())
  on the temporary allocator and does not need to be freed.
 
  @param stream : `The stream to read from.`
- @require @is_instream(stream) : `The stream must implement InStream.`
+ @require io::@is_instream(stream) : `The stream must implement InStream.`
  @return `The temporary string containing the data read.`
 *>
 macro String? treadline(stream = io::stdin())
