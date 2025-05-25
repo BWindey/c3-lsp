@@ -5,20 +5,6 @@ import std::core::dstring;
 import std::core::string;
 import std::io;
 
-enum ErrorCode: int (inline int code_value) {
-	PARSE_ERROR = -32700,
-	INVALID_REQUEST = -32600,
-	METHOD_NOT_FOUND = -32601,
-	INVALID_PARAMS = -32602,
-	INTERNAL_ERROR = -32603,
-	SERVER_NOT_INITIALIZED = -32002,
-	UNKNOWN_ERROR_CODE = -32001,
-	REQUEST_FAILED = -32803,
-	SERVER_CANCELLED = -32802,
-	CONTENT_MODIFIED = -32801,
-	REQUEST_CANCELLED = -32800,
-}
-
 fn void send_message(String message) {
 	io::printfn("Content-Length: %d\r\n\r\n%s", message.len, message);
 }
