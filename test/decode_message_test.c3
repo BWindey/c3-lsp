@@ -14,7 +14,7 @@ fn void test_decode_message_success() @test {
 	assert(message.len() > 0);
 }
 
-fn void test_decode_message_failure_mismatch() @test {
+fn void test_decode_message_failure__mismatch() @test {
 	String _message = "Content-Length: 11\r\n\r\n{\"hello\": 3}";
 	DString message = dstring::temp_with_capacity(_message.len);
 	message.append(_message);
@@ -24,7 +24,7 @@ fn void test_decode_message_failure_mismatch() @test {
 	assert(message.len() == 0);
 }
 
-fn void test_decode_message_failure_invalid_header() @test {
+fn void test_decode_message_failure__invalid_header() @test {
 	String _message = "Some-giberish: haai\r\n\r\n{\"hello\": 3}";
 	DString message = dstring::temp_with_capacity(_message.len);
 	message.append(_message);
@@ -34,7 +34,7 @@ fn void test_decode_message_failure_invalid_header() @test {
 	assert(message.len() == 0);
 }
 
-fn void test_decode_message_failure_incomplete() @test {
+fn void test_decode_message_failure__incomplete() @test {
 	String _message = "Content-Length: 11\r\n";
 	DString message = dstring::temp_with_capacity(_message.len);
 	message.append(_message);
@@ -65,3 +65,58 @@ fn void test_parse_content_length_failure() @test {
 	assert(@catch(content_length_opt) == string::MALFORMED_INTEGER);
 	assert(header.len() == 0);
 }
+
+fn void extract_method_success() @test {
+	String _buffer_start = "Content-Length: 1x\r\n\r\n";
+	String body = `{"id": "123", "method": "textDocument/changed", "tada": 0}`;
+	DString buffer = dstring::temp_with_capacity(_buffer_start.len + body.len);
+	buffer.append(_buffer_start);
+	buffer.append(body);
+
+	String? parsed_method_opt = extract_method(body, &buffer);
+	assert(@ok(parsed_method_opt));
+	if (try parsed_method = parsed_method_opt) {
+		assert(
+			parsed_method == "textDocument/changed",
+			"\nExpected: %s\nGot: %s\n", "textDocument/changed", parsed_method
+		);
+	}
+	assert(buffer.len() > 0);
+}
+
+fn void extract_method_failure__method_not_found() @test {
+	String _buffer_start = "Content-Length: 1x\r\n\r\n";
+	String body = `{"id": "123", "tada": 0}`;
+	DString buffer = dstring::temp_with_capacity(_buffer_start.len + body.len);
+	buffer.append(_buffer_start);
+
+	String? parsed_method_opt = extract_method(body, &buffer);
+	assert(!@ok(parsed_method_opt));
+	assert(@catch(parsed_method_opt) == NOT_FOUND);
+	assert(buffer.len() == 0);
+}
+
+fn void extract_method_failure__value_not_found() @test {
+	String _buffer_start = "Content-Length: 1x\r\n\r\n";
+	String body = `{"id": "123", "method": 3}`;
+	DString buffer = dstring::temp_with_capacity(_buffer_start.len + body.len);
+	buffer.append(_buffer_start);
+
+	String? parsed_method_opt = extract_method(body, &buffer);
+	assert(!@ok(parsed_method_opt));
+	assert(@catch(parsed_method_opt) == VALUE_NOT_FOUND);
+	assert(buffer.len() == 0);
+}
+
+fn void extract_method_failure__end_of_value_not_found() @test {
+	String _buffer_start = "Content-Length: 1x\r\n\r\n";
+	String body = `{"id": "123", "method": "imcomplete}`;
+	DString buffer = dstring::temp_with_capacity(_buffer_start.len + body.len);
+	buffer.append(_buffer_start);
+
+	String? parsed_method_opt = extract_method(body, &buffer);
+	assert(!@ok(parsed_method_opt));
+	assert(@catch(parsed_method_opt) == NOT_FOUND);
+	assert(buffer.len() == 0);
+}
+
