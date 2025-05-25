@@ -39,4 +39,5 @@ fn void? handle_incoming(String message) @maydiscard {
 
 	// Rethrow but actually discard, not superclean, but should work.
 	String body = decode_message(&buffer)!;
+	String extracted_method = extract_method(body, &buffer)!;
 }
