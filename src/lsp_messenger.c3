@@ -5,17 +5,27 @@ import std::core::dstring;
 import std::core::string;
 import std::io;
 
-fn void send_message(String message) {
-	io::printfn("Content-Length: %d\r\n\r\n%s", message.len, message);
+<*
+	@require @typekind(message) == STRUCT : `Can only send structs`
+*>
+macro void send_message(message) {
+	String serialized_message = string::tformat("%s", message);
+	io::printfn(
+		"Content-Length: %d\r\n\r\n%s",
+		serialized_message.len, serialized_message
+	);
 }
 
 fn void send_error(String request_id, ErrorCode code, String message_format, args...) {
 	String formatted_msg = string::tformat(message_format, args);
-	String formatted_payload = string::tformat(
-		`{"id":"%s","error":{"code":%s,"mesage":"%s"}}`,
-		request_id, code, formatted_msg
-	);
-	send_message(formatted_payload);
+	send_message((ResponseMessage) {
+		.requestID = "",
+		.result = null,
+		.error = &&(ResponseError) {
+			.code = code.ordinal,
+			.message = formatted_msg,
+		}
+	});
 }
 
 fn void? handle_incoming(String message) @maydiscard {
