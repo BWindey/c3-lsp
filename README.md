@@ -11,3 +11,7 @@ https://github.com/pherrymason/c3-lsp.
 > This is because that commit specifically fixed a bug with `os::exit()` which
 > missed a `@noreturn` tag.
 
+> [!NOTE]
+> Development of this project is currently not ongoing, it was published to
+> allow others to look at what exists, and to potentially build upon.
+> I will pick up development later though.
