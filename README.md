@@ -1,7 +1,7 @@
 # C3-lsp
 Eh, this is you know, an LSP for C3. Written in C3. But not working at all yet.
 
-There is this more developped one in Go (it works as opposed to this one):
+There is this more developed one in Go (it works as opposed to this one):
 https://github.com/pherrymason/c3-lsp.
 
 > [!WARNING]
